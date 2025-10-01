@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StellarBay - Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+    </style>
+</head>
+<body class="bg-slate-900 min-h-screen flex items-center justify-center p-4">
+    <!-- Background Elements -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse-slow"></div>
+        <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse-slow"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-bounce-slow"></div>
+    </div>
+
+    <!-- Login Container -->
+    <div class="relative w-full max-w-md">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center gap-3 mb-4">
+                <div class="p-3 gradient-bg rounded-xl shadow-lg text-white">
+                    <i class="fas fa-code text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-bold text-white">StellarBay</h1>
+                    <p class="text-slate-400 text-sm">API Platform</p>
+                </div>
+            </div>
+            <p class="text-slate-400">Sign in to your account</p>
+        </div>
+
+        <!-- Login Form -->
+        <div class="glass-effect rounded-2xl p-8 shadow-2xl">
+            <form id="loginForm" class="space-y-6">
+                {% csrf_token %}
+                
+                <!-- Username Field -->
+                <div>
+                    <label for="username" class="block text-sm font-medium text-slate-300 mb-2">
+                        <i class="fas fa-user mr-2"></i>Username
+                    </label>
+                    <div class="relative">
+                        <input 
+                            type="text" 
+                            id="username" 
+                            name="username"
+                            required
+                            class="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                            placeholder="Enter your username"
+                        >
+                        <i class="fas fa-user absolute right-3 top-3 text-slate-500"></i>
+                    </div>
+                </div>
+
+                <!-- Password Field -->
+                <div>
+                    <label for="password" class="block text-sm font-medium text-slate-300 mb-2">
+                        <i class="fas fa-lock mr-2"></i>Password
+                    </label>
+                    <div class="relative">
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password"
+                            required
+                            class="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                            placeholder="Enter your password"
+                        >
+                        <i class="fas fa-lock absolute right-3 top-3 text-slate-500"></i>
+                    </div>
+                </div>
+
+                <!-- Remember Me & Forgot Password -->
+                <div class="flex items-center justify-between">
+                    <label class="flex items-center">
+                        <input type="checkbox" class="w-4 h-4 text-indigo-600 bg-slate-800 border-slate-700 rounded focus:ring-indigo-500">
+                        <span class="ml-2 text-sm text-slate-400">Remember me</span>
+                    </label>
+                    <a href="#" class="text-sm text-indigo-400 hover:text-indigo-300 transition-colors">
+                        Forgot password?
+                    </a>
+                </div>
+
+                <!-- Submit Button -->
+                <button 
+                    type="submit"
+                    id="loginBtn"
+                    class="w-full gradient-bg text-white py-3 px-4 rounded-lg font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:ring-offset-slate-900"
+                >
+                    <i class="fas fa-sign-in-alt mr-2"></i>
+                    <span id="btnText">Sign In</span>
+                    <i id="loadingSpinner" class="fas fa-spinner fa-spin ml-2 hidden"></i>
+                </button>
+
+                <!-- Demo Credentials -->
+                <div class="mt-6 p-4 bg-slate-800 rounded-lg border border-slate-700">
+                    <h3 class="text-sm font-medium text-slate-300 mb-2 flex items-center">
+                        <i class="fas fa-info-circle mr-2 text-indigo-400"></i>
+                        Demo Credentials
+                    </h3>
+                    <div class="text-xs text-slate-400 space-y-1">
+                        <div><span class="text-slate-300">Username:</span> demo</div>
+                        <div><span class="text-slate-300">Password:</span> demo123</div>
+                    </div>
+                </div>
+            </form>
+
+            <!-- API Status -->
+            <div id="apiStatus" class="mt-6 p-3 rounded-lg bg-slate-800 border border-slate-700 hidden">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-slate-300">API Status</span>
+                    <span id="statusIndicator" class="flex items-center text-sm">
+                        <i class="fas fa-circle mr-2"></i>
+                        <span id="statusText">Checking...</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-6">
+            <p class="text-slate-500 text-sm">
+                Don't have an account? 
+                <a href="#" class="text-indigo-400 hover:text-indigo-300 transition-colors font-medium">
+                    Sign up
+                </a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed top-4 right-4 p-4 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300 z-50 hidden">
+        <div class="flex items-center">
+            <i id="toastIcon" class="fas mr-3"></i>
+            <span id="toastMessage" class="text-sm font-medium"></span>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration
+        const API_BASE_URL = window.location.origin;
+
+        // DOM Elements
+        const loginForm = document.getElementById('loginForm');
+        const loginBtn = document.getElementById('loginBtn');
+        const btnText = document.getElementById('btnText');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const apiStatus = document.getElementById('apiStatus');
+        const statusIndicator = document.getElementById('statusIndicator');
+        const statusText = document.getElementById('statusText');
+        const toast = document.getElementById('toast');
+        const toastIcon = document.getElementById('toastIcon');
+        const toastMessage = document.getElementById('toastMessage');
+
+        // Show toast notification
+        function showToast(message, type = 'info') {
+            const colors = {
+                success: 'bg-green-500 text-white',
+                error: 'bg-red-500 text-white',
+                warning: 'bg-yellow-500 text-white',
+                info: 'bg-blue-500 text-white'
+            };
+
+            const icons = {
+                success: 'fa-check-circle',
+                error: 'fa-exclamation-circle',
+                warning: 'fa-exclamation-triangle',
+                info: 'fa-info-circle'
+            };
+
+            toast.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300 z-50 ${colors[type]}`;
+            toastIcon.className = `fas ${icons[type]} mr-3`;
+            toastMessage.textContent = message;
+            
+            toast.classList.remove('hidden');
+            toast.classList.remove('translate-x-full');
+            toast.classList.add('translate-x-0');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-x-0');
+                toast.classList.add('translate-x-full');
+                setTimeout(() => toast.classList.add('hidden'), 300);
+            }, 4000);
+        }
+
+        // Check API status
+        async function checkAPIStatus() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/auth/login/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({username: 'test', password: 'test'})
+                });
+
+                apiStatus.classList.remove('hidden');
+                
+                if (response.status !== 401) { // 401 is expected for invalid credentials
+                    statusIndicator.innerHTML = '<i class="fas fa-circle text-red-500 mr-2"></i><span>API Offline</span>';
+                    showToast('API is currently offline', 'error');
+                } else {
+                    statusIndicator.innerHTML = '<i class="fas fa-circle text-green-500 mr-2"></i><span>API Online</span>';
+                }
+            } catch (error) {
+                apiStatus.classList.remove('hidden');
+                statusIndicator.innerHTML = '<i class="fas fa-circle text-red-500 mr-2"></i><span>API Offline</span>';
+                showToast('Cannot connect to API server', 'error');
+            }
+        }
+
+        // Handle form submission
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            // Show loading state
+            loginBtn.disabled = true;
+            btnText.textContent = 'Signing In...';
+            loadingSpinner.classList.remove('hidden');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/auth/login/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Store tokens
+                    localStorage.setItem('authToken', data.access);
+                    localStorage.setItem('refreshToken', data.refresh);
+                    
+                    showToast('Login successful! Redirecting...', 'success');
+                    
+                    // Redirect to main application
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 1500);
+                } else {
+                    throw new Error(data.detail || 'Login failed');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showToast(error.message || 'Login failed. Please check your credentials.', 'error');
+                
+                // Shake animation for error
+                loginForm.classList.add('shake');
+                setTimeout(() => loginForm.classList.remove('shake'), 500);
+            } finally {
+                // Reset button state
+                loginBtn.disabled = false;
+                btnText.textContent = 'Sign In';
+                loadingSpinner.classList.add('hidden');
+            }
+        });
+
+        // Demo credentials auto-fill
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'd' && e.ctrlKey) {
+                document.getElementById('username').value = 'demo';
+                document.getElementById('password').value = 'demo123';
+                showToast('Demo credentials filled!', 'info');
+            }
+        });
+
+        // Check API status on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAPIStatus();
+            
+            // Check if user is already logged in
+            const token = localStorage.getItem('authToken');
+            if (token) {
+                window.location.href = '/';
+            }
+        });
+
+        // Input field animations
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.classList.add('ring-2', 'ring-indigo-500');
+            });
+            
+            input.addEventListener('blur', () => {
+                input.parentElement.classList.remove('ring-2', 'ring-indigo-500');
+            });
+        });
+    </script>
+</body>
+</html>
