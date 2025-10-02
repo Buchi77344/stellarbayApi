@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discounts - E-commerce CMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .discount-card:hover {
+            transform: translateY(-3px);
+            transition: transform 0.3s ease;
+        }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+        .coupon-code {
+            font-family: 'Courier New', monospace;
+            letter-spacing: 0.05em;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <div class="w-64 bg-white dark:bg-gray-800 shadow-lg z-10 flex flex-col hidden lg:flex">
+            <!-- Logo -->
+            <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 rounded-lg bg-gradient-to-r from-primary-500 to-primary-700 flex items-center justify-center">
+                        <i class="fas fa-shopping-bag text-white text-sm"></i>
+                    </div>
+                    <span class="text-xl font-bold text-gray-800 dark:text-white">Stelllarbay</span>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="flex-1 px-4 py-6">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="{% url 'dashboard' %}" class="flex items-center space-x-3 p-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <i class="fas fa-home w-5 text-center"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'product' %}" class="flex items-center space-x-3 p-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <i class="fas fa-box w-5 text-center"></i>
+                            <span>Products</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'orders' %}" class="flex items-center space-x-3 p-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <i class="fas fa-shopping-cart w-5 text-center"></i>
+                            <span>Orders</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'customer' %}" class="flex items-center space-x-3 p-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <i class="fas fa-users w-5 text-center"></i>
+                            <span>Customers</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'analysis' %}" class="flex items-center space-x-3 p-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <i class="fas fa-chart-bar w-5 text-center"></i>
+                            <span>Analytics</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'discount' %}" class="flex items-center space-x-3 p-3 rounded-xl bg-primary-50 dark:bg-gray-700 text-primary-600 dark:text-primary-400 font-medium">
+                            <i class="fas fa-tags w-5 text-center"></i>
+                            <span>Discounts</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'settings' %}" class="flex items-center space-x-3 p-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <i class="fas fa-cog w-5 text-center"></i>
+                            <span>Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header -->
+            <header class="bg-white dark:bg-gray-800 shadow-sm z-10">
+                <div class="flex items-center justify-between px-6 py-4">
+                    <div class="flex items-center">
+                        <button id="mobileMenuToggle" class="lg:hidden text-gray-500 dark:text-gray-400 mr-4">
+                            <i class="fas fa-bars text-xl"></i>
+                        </button>
+                        <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Discounts</h1>
+                    </div>
+
+                    <div class="flex items-center space-x-6">
+                        <!-- Theme Toggle -->
+                        <button id="themeToggle" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+                            <i class="fas fa-moon dark:hidden"></i>
+                            <i class="fas fa-sun hidden dark:block"></i>
+                        </button>
+
+                        <!-- Notifications -->
+                        <button class="relative text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+                            <i class="fas fa-bell text-xl"></i>
+                            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">2</span>
+                        </button>
+
+                        <!-- User Menu -->
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-r from-primary-500 to-primary-700 flex items-center justify-center text-white font-semibold text-sm">
+                                JD
+                            </div>
+                            <span class="hidden md:block text-sm font-medium text-gray-700 dark:text-gray-300">John Doe</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Discounts Content -->
+            <main class="flex-1 overflow-y-auto p-6">
+                <!-- Page Header -->
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Promotions & Discounts</h2>
+                        <p class="text-gray-600 dark:text-gray-400 mt-1">Manage discount codes and promotional campaigns</p>
+                    </div>
+                    <div class="mt-4 md:mt-0 flex space-x-3">
+                        <button class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors flex items-center">
+                            <i class="fas fa-download mr-2"></i>
+                            <span>Export</span>
+                        </button>
+                        <button class="px-4 py-2 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors flex items-center" onclick="openCreateModal()">
+                            <i class="fas fa-plus mr-2"></i>
+                            <span>Create Discount</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Discount Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-100 dark:border-gray-700">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Active Discounts</p>
+                                <h3 class="text-2xl font-bold text-gray-800 dark:text-white">12</h3>
+                            </div>
+                            <div class="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-500 dark:text-green-400">
+                                <i class="fas fa-tag text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-2 flex items-center text-sm">
+                            <span class="text-green-500 flex items-center">
+                                <i class="fas fa-arrow-up mr-1"></i> 3 new
+                            </span>
+                            <span class="text-gray-500 dark:text-gray-400 ml-2">this month</span>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-100 dark:border-gray-700">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Total Redeemed</p>
+                                <h3 class="text-2xl font-bold text-gray-800 dark:text-white">1,847</h3>
+                            </div>
+                            <div class="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-500 dark:text-blue-400">
+                                <i class="fas fa-shopping-cart text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-2 flex items-center text-sm">
+                            <span class="text-green-500 flex items-center">
+                                <i class="fas fa-arrow-up mr-1"></i> 24.5%
+                            </span>
+                            <span class="text-gray-500 dark:text-gray-400 ml-2">from last month</span>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-100 dark:border-gray-700">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Discount Revenue</p>
+                                <h3 class="text-2xl font-bold text-gray-800 dark:text-white">$8,452</h3>
+                            </div>
+                            <div class="p-3 rounded-lg bg-purple-50 dark:bg-purple-900/20 text-purple-500 dark:text-purple-400">
+                                <i class="fas fa-dollar-sign text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-2 flex items-center text-sm">
+                            <span class="text-green-500 flex items-center">
+                                <i class="fas fa-arrow-up mr-1"></i> 18.3%
+                            </span>
+                            <span class="text-gray-500 dark:text-gray-400 ml-2">from last month</span>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-100 dark:border-gray-700">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Avg. Discount</p>
+                                <h3 class="text-2xl font-bold text-gray-800 dark:text-white">18.5%</h3>
+                            </div>
+                            <div class="p-3 rounded-lg bg-orange-50 dark:bg-orange-900/20 text-orange-500 dark:text-orange-400">
+                                <i class="fas fa-percent text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-2 flex items-center text-sm">
+                            <span class="text-red-500 flex items-center">
+                                <i class="fas fa-arrow-down mr-1"></i> 2.1%
+                            </span>
+                            <span class="text-gray-500 dark:text-gray-400 ml-2">from last month</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filters and Search -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700 mb-6">
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between space-y-4 lg:space-y-0">
+                        <div class="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4 flex-1">
+                            <!-- Search -->
+                            <div class="relative flex-1 max-w-md">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-search text-gray-400"></i>
+                                </div>
+                                <input type="text" class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="Search discounts...">
+                            </div>
+                            
+                            <!-- Status Filter -->
+                            <div class="w-full md:w-48">
+                                <select class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent sm:text-sm rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                    <option>All Status</option>
+                                    <option>Active</option>
+                                    <option>Scheduled</option>
+                                    <option>Expired</option>
+                                    <option>Paused</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Type Filter -->
+                            <div class="w-full md:w-48">
+                                <select class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent sm:text-sm rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                    <option>All Types</option>
+                                    <option>Percentage</option>
+                                    <option>Fixed Amount</option>
+                                    <option>Free Shipping</option>
+                                    <option>BOGO</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- View Toggle -->
+                        <div class="flex items-center space-x-2">
+                            <button class="p-2 rounded-lg bg-primary-100 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400">
+                                <i class="fas fa-th-large"></i>
+                            </button>
+                            <button class="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                <i class="fas fa-list"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Discounts Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                    <!-- Discount Card 1 -->
+                    <div class="discount-card bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 class="font-semibold text-gray-800 dark:text-white text-lg">Summer Sale</h3>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Sitewide summer promotion</p>
+                                </div>
+                                <span class="status-badge bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400">
+                                    <i class="fas fa-circle text-xs mr-1"></i> Active
+                                </span>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-2xl font-bold text-gray-800 dark:text-white">25% OFF</span>
+                                    <span class="coupon-code bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-3 py-1 rounded-lg text-sm font-medium">
+                                        SUMMER25
+                                    </span>
+                                </div>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">Minimum spend: $50</p>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-gray-600 dark:text-gray-400">Usage</span>
+                                    <span class="font-medium text-gray-800 dark:text-white">247/500</span>
+                                </div>
+                                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                    <div class="bg-blue-600 h-2 rounded-full" style="width: 49%"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400 mb-4">
+                                <div>
+                                    <i class="fas fa-calendar-alt mr-1"></i>
+                                    <span>Jun 1 - Jun 30, 2023</span>
+                                </div>
+                                <div>
+                                    <i class="fas fa-shopping-cart mr-1"></i>
+                                    <span>$4,258</span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex space-x-2">
+                                <button class="flex-1 px-3 py-2 text-sm bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors">
+                                    Edit
+                                </button>
+                                <button class="px-3 py-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <button class="px-3 py-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                                    <i class="fas fa-chart-bar"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Discount Card 2 -->
+                    <div class="discount-card bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 class="font-semibold text-gray-800 dark:text-white text-lg">Welcome Offer</h3>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">New customer discount</p>
+                                </div>
+                                <span class="status-badge bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400">
+                                    <i class="fas fa-circle text-xs mr-1"></i> Active
+                                </span>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-2xl font-bold text-gray-800 dark:text-white">$15 OFF</span>
+                                    <span class="coupon-code bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-3 py-1 rounded-lg text-sm font-medium">
+                                        WELCOME15
+                                    </span>
+                                </div>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">First order only</p>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-gray-600 dark:text-gray-400">Usage</span>
+                                    <span class="font-medium text-gray-800 dark:text-white">142/∞</span>
+                                </div>
+                                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                    <div class="bg-green-600 h-2 rounded-full" style="width: 28%"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400 mb-4">
+                                <div>
+                                    <i class="fas fa-calendar-alt mr-1"></i>
+                                    <span>Ongoing</span>
+                                </div>
+                                <div>
+                                    <i class="fas fa-shopping-cart mr-1"></i>
+                                    <span>$2,130</span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex space-x-2">
+                                <button class="flex-1 px-3 py-2 text-sm bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors">
+                                    Edit
+                                </button>
+                                <button class="px-3 py-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <button class="px-3 py-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                                    <i class="fas fa-chart-bar"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Discount Card 3 -->
+                    <div class="discount-card bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 class="font-semibold text-gray-800 dark:text-white text-lg">Free Shipping</h3>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Free shipping promotion</p>
+                                </div>
+                                <span class="status-badge bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-400">
+                                    <i class="fas fa-circle text-xs mr-1"></i> Scheduled
+                                </span>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-2xl font-bold text-gray-800 dark:text-white">FREE SHIP</span>
+                                    <span class="coupon-code bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-3 py-1 rounded-lg text-sm font-medium">
+                                        FREESHIP
+                                    </span>
+                                </div>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">Minimum spend: $75</p>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-gray-600 dark:text-gray-400">Usage</span>
+                                    <span class="font-medium text-gray-800 dark:text-white">0/1000</span>
+                                </div>
+                                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                    <div class="bg-gray-400 h-2 rounded-full" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400 mb-4">
+                                <div>
+                                    <i class="fas fa-calendar-alt mr-1"></i>
+                                    <span>Starts Jul 1, 2023</span>
+                                </div>
+                                <div>
+                                    <i class="fas fa-shopping-cart mr-1"></i>
+                                    <span>$0</span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex space-x-2">
+                                <button class="flex-1 px-3 py-2 text-sm bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors">
+                                    Edit
+                                </button>
+                                <button class="px-3 py-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <button class="px-3 py-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                                    <i class="fas fa-chart-bar"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Performance Section -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Discount Performance</h3>
+                        <button class="text-primary-600 dark:text-primary-400 text-sm font-medium">
+                            View Full Report
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-gray-800 dark:text-white mb-2">3.2%</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">Redemption Rate</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-gray-800 dark:text-white mb-2">$124.50</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">Avg. Order with Discount</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-gray-800 dark:text-white mb-2">42%</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">New Customer Acquisition</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-gray-800 dark:text-white mb-2">2.8x</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">ROI on Discounts</div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Create Discount Modal -->
+    <div id="createModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg max-w-md w-full mx-4">
+            <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Create New Discount</h3>
+            </div>
+            <div class="p-6">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Discount Name</label>
+                        <input type="text" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Summer Sale">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Discount Type</label>
+                        <select class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                            <option>Percentage Discount</option>
+                            <option>Fixed Amount</option>
+                            <option>Free Shipping</option>
+                            <option>Buy One Get One</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Discount Value</label>
+                        <input type="text" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="25">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Coupon Code</label>
+                        <input type="text" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="SUMMER25">
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-3">
+                <button class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors" onclick="closeCreateModal()">
+                    Cancel
+                </button>
+                <button class="px-4 py-2 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors">
+                    Create Discount
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            
+            // Save theme preference to localStorage
+            if (document.documentElement.classList.contains('dark')) {
+                localStorage.setItem('theme', 'dark');
+            } else {
+                localStorage.setItem('theme', 'light');
+            }
+        });
+        
+        // Check for saved theme preference
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+        }
+
+        // Mobile Menu Toggle
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const sidebar = document.querySelector('.w-64');
+        
+        mobileMenuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('hidden');
+            sidebar.classList.toggle('absolute');
+            sidebar.classList.toggle('inset-y-0');
+            sidebar.classList.toggle('left-0');
+        });
+
+        // Create Discount Modal
+        function openCreateModal() {
+            document.getElementById('createModal').classList.remove('hidden');
+        }
+
+        function closeCreateModal() {
+            document.getElementById('createModal').classList.add('hidden');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('createModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeCreateModal();
+            }
+        });
+
+        // Copy coupon code functionality
+        const couponCodes = document.querySelectorAll('.coupon-code');
+        couponCodes.forEach(code => {
+            code.addEventListener('click', function() {
+                const text = this.textContent;
+                navigator.clipboard.writeText(text).then(() => {
+                    const originalText = this.textContent;
+                    this.textContent = 'Copied!';
+                    this.classList.add('bg-green-100', 'dark:bg-green-900/20', 'text-green-800', 'dark:text-green-400');
+                    
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                        this.classList.remove('bg-green-100', 'dark:bg-green-900/20', 'text-green-800', 'dark:text-green-400');
+                    }, 2000);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

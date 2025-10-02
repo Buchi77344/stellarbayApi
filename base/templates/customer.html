@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Management - E-commerce CMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .customer-card:hover {
+            transform: translateY(-3px);
+            transition: transform 0.3s ease;
+        }
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+        .segment-tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .activity-timeline {
+            position: relative;
+        }
+        .activity-timeline::before {
+            content: '';
+            position: absolute;
+            left: 1rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: #e5e7eb;
+        }
+        .dark .activity-timeline::before {
+            background-color: #4b5563;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <div class="w-64 bg-white dark:bg-gray-800 shadow-lg z-10 flex flex-col hidden lg:flex">
+            <!-- Logo -->
+            <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 rounded-lg bg-gradient-to-r from-primary-500 to-primary-700 flex items-center justify-center">
+                        <i class="fas fa-shopping-bag text-white text-sm"></i>
+                    </div>
+                    <span class="text-xl font-bold text-gray-800 dark:text-white">Stelllarbay</span>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="flex-1 px-4 py-6">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="{% url 'dashboard' %}" class="flex items-center space-x-3 p-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <i class="fas fa-home w-5 text-center"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'product' %}" class="flex items-center space-x-3 p-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <i class="fas fa-box w-5 text-center"></i>
+                            <span>Products</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'orders' %}" class="flex items-center space-x-3 p-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <i class="fas fa-shopping-cart w-5 text-center"></i>
+                            <span>Orders</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'customer' %}" class="flex items-center space-x-3 p-3 rounded-xl bg-primary-50 dark:bg-gray-700 text-primary-600 dark:text-primary-400 font-medium">
+                            <i class="fas fa-users w-5 text-center"></i>
+                            <span>Customers</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'analysis' %}" class="flex items-center space-x-3 p-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <i class="fas fa-chart-bar w-5 text-center"></i>
+                            <span>Analytics</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'discount' %}" class="flex items-center space-x-3 p-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <i class="fas fa-tags w-5 text-center"></i>
+                            <span>Discounts</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'settings' %}" class="flex items-center space-x-3 p-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <i class="fas fa-cog w-5 text-center"></i>
+                            <span>Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header -->
+            <header class="bg-white dark:bg-gray-800 shadow-sm z-10">
+                <div class="flex items-center justify-between px-6 py-4">
+                    <div class="flex items-center">
+                        <button id="mobileMenuToggle" class="lg:hidden text-gray-500 dark:text-gray-400 mr-4">
+                            <i class="fas fa-bars text-xl"></i>
+                        </button>
+                        <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Customers</h1>
+                    </div>
+
+                    <div class="flex items-center space-x-6">
+                        <!-- Theme Toggle -->
+                        <button id="themeToggle" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+                            <i class="fas fa-moon dark:hidden"></i>
+                            <i class="fas fa-sun hidden dark:block"></i>
+                        </button>
+
+                        <!-- Notifications -->
+                        <button class="relative text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+                            <i class="fas fa-bell text-xl"></i>
+                            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">2</span>
+                        </button>
+
+                        <!-- User Menu -->
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-r from-primary-500 to-primary-700 flex items-center justify-center text-white font-semibold text-sm">
+                                JD
+                            </div>
+                            <span class="hidden md:block text-sm font-medium text-gray-700 dark:text-gray-300">John Doe</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Customers Content -->
+            <main class="flex-1 overflow-y-auto p-6">
+                <!-- Page Header -->
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Customer Management</h2>
+                        <p class="text-gray-600 dark:text-gray-400 mt-1">Manage customer profiles and segments</p>
+                    </div>
+                    <div class="mt-4 md:mt-0 flex space-x-3">
+                        <button class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors flex items-center">
+                            <i class="fas fa-download mr-2"></i>
+                            <span>Export</span>
+                        </button>
+                        <button class="px-4 py-2 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors flex items-center">
+                            <i class="fas fa-user-plus mr-2"></i>
+                            <span>Add Customer</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Customer Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-100 dark:border-gray-700">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Total Customers</p>
+                                <h3 class="text-2xl font-bold text-gray-800 dark:text-white">3,214</h3>
+                            </div>
+                            <div class="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-500 dark:text-blue-400">
+                                <i class="fas fa-users text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-2 flex items-center text-sm">
+                            <span class="text-green-500 flex items-center">
+                                <i class="fas fa-arrow-up mr-1"></i> 8.3%
+                            </span>
+                            <span class="text-gray-500 dark:text-gray-400 ml-2">from last month</span>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-100 dark:border-gray-700">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">New This Month</p>
+                                <h3 class="text-2xl font-bold text-gray-800 dark:text-white">142</h3>
+                            </div>
+                            <div class="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-500 dark:text-green-400">
+                                <i class="fas fa-user-plus text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-2 flex items-center text-sm">
+                            <span class="text-green-500 flex items-center">
+                                <i class="fas fa-arrow-up mr-1"></i> 12.5%
+                            </span>
+                            <span class="text-gray-500 dark:text-gray-400 ml-2">from last month</span>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-100 dark:border-gray-700">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Active Customers</p>
+                                <h3 class="text-2xl font-bold text-gray-800 dark:text-white">2,847</h3>
+                            </div>
+                            <div class="p-3 rounded-lg bg-purple-50 dark:bg-purple-900/20 text-purple-500 dark:text-purple-400">
+                                <i class="fas fa-user-check text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-2 flex items-center text-sm">
+                            <span class="text-green-500 flex items-center">
+                                <i class="fas fa-arrow-up mr-1"></i> 5.7%
+                            </span>
+                            <span class="text-gray-500 dark:text-gray-400 ml-2">from last month</span>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-100 dark:border-gray-700">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Avg. Order Value</p>
+                                <h3 class="text-2xl font-bold text-gray-800 dark:text-white">$124.50</h3>
+                            </div>
+                            <div class="p-3 rounded-lg bg-orange-50 dark:bg-orange-900/20 text-orange-500 dark:text-orange-400">
+                                <i class="fas fa-dollar-sign text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-2 flex items-center text-sm">
+                            <span class="text-red-500 flex items-center">
+                                <i class="fas fa-arrow-down mr-1"></i> 2.1%
+                            </span>
+                            <span class="text-gray-500 dark:text-gray-400 ml-2">from last month</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Customer Segments -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700 mb-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-lg font-semibold text-gray-800 dark:text-white">Customer Segments</h2>
+                        <button class="text-primary-600 dark:text-primary-400 text-sm font-medium flex items-center">
+                            <i class="fas fa-plus mr-1"></i>
+                            <span>Create Segment</span>
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="segment-tag bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-400">
+                                    <i class="fas fa-star mr-1"></i> VIP Customers
+                                </span>
+                                <span class="text-xs text-gray-500 dark:text-gray-400">284</span>
+                            </div>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">Top 10% spending customers</p>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="segment-tag bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400">
+                                    <i class="fas fa-bolt mr-1"></i> Active Buyers
+                                </span>
+                                <span class="text-xs text-gray-500 dark:text-gray-400">1,247</span>
+                            </div>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">Purchased in last 30 days</p>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="segment-tag bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-400">
+                                    <i class="fas fa-clock mr-1"></i> At Risk
+                                </span>
+                                <span class="text-xs text-gray-500 dark:text-gray-400">392</span>
+                            </div>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">No purchase in 90+ days</p>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="segment-tag bg-purple-100 dark:bg-purple-900/20 text-purple-800 dark:text-purple-400">
+                                    <i class="fas fa-gift mr-1"></i> New Customers
+                                </span>
+                                <span class="text-xs text-gray-500 dark:text-gray-400">142</span>
+                            </div>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">Joined in last 30 days</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filters and Search -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700 mb-6">
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between space-y-4 lg:space-y-0">
+                        <div class="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4 flex-1">
+                            <!-- Search -->
+                            <div class="relative flex-1 max-w-md">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-search text-gray-400"></i>
+                                </div>
+                                <input type="text" class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="Search customers...">
+                            </div>
+                            
+                            <!-- Segment Filter -->
+                            <div class="w-full md:w-48">
+                                <select class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent sm:text-sm rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                    <option>All Segments</option>
+                                    <option>VIP Customers</option>
+                                    <option>Active Buyers</option>
+                                    <option>At Risk</option>
+                                    <option>New Customers</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Status Filter -->
+                            <div class="w-full md:w-48">
+                                <select class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent sm:text-sm rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                    <option>All Status</option>
+                                    <option>Active</option>
+                                    <option>Inactive</option>
+                                    <option>Blocked</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- View Toggle -->
+                        <div class="flex items-center space-x-2">
+                            <button class="p-2 rounded-lg bg-primary-100 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400">
+                                <i class="fas fa-th-large"></i>
+                            </button>
+                            <button class="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                <i class="fas fa-list"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Customers Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Customer Card 1 -->
+                    <div class="customer-card bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-blue-700 flex items-center justify-center text-white font-semibold text-lg">
+                                        JS
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-800 dark:text-white">John Smith</h3>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400">john@example.com</p>
+                                    </div>
+                                </div>
+                                <div class="relative">
+                                    <button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div class="text-center">
+                                    <p class="text-2xl font-bold text-gray-800 dark:text-white">12</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">Orders</p>
+                                </div>
+                                <div class="text-center">
+                                    <p class="text-2xl font-bold text-gray-800 dark:text-white">$2,458</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">Total Spent</p>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-gray-600 dark:text-gray-400">Customer Value</span>
+                                    <span class="font-medium text-gray-800 dark:text-white">VIP</span>
+                                </div>
+                                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                    <div class="bg-blue-600 h-2 rounded-full" style="width: 90%"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                <span class="segment-tag bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-400">
+                                    VIP
+                                </span>
+                                <span class="segment-tag bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400">
+                                    Active
+                                </span>
+                            </div>
+                            
+                            <div class="flex justify-between">
+                                <button class="px-3 py-1.5 text-sm bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors">
+                                    View Profile
+                                </button>
+                                <button class="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                                    Message
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Customer Card 2 -->
+                    <div class="customer-card bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-purple-700 flex items-center justify-center text-white font-semibold text-lg">
+                                        SJ
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-800 dark:text-white">Sarah Johnson</h3>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400">sarah@example.com</p>
+                                    </div>
+                                </div>
+                                <div class="relative">
+                                    <button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div class="text-center">
+                                    <p class="text-2xl font-bold text-gray-800 dark:text-white">8</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">Orders</p>
+                                </div>
+                                <div class="text-center">
+                                    <p class="text-2xl font-bold text-gray-800 dark:text-white">$1,245</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">Total Spent</p>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-gray-600 dark:text-gray-400">Customer Value</span>
+                                    <span class="font-medium text-gray-800 dark:text-white">Regular</span>
+                                </div>
+                                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                    <div class="bg-green-600 h-2 rounded-full" style="width: 65%"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                <span class="segment-tag bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400">
+                                    Active
+                                </span>
+                                <span class="segment-tag bg-purple-100 dark:bg-purple-900/20 text-purple-800 dark:text-purple-400">
+                                    New
+                                </span>
+                            </div>
+                            
+                            <div class="flex justify-between">
+                                <button class="px-3 py-1.5 text-sm bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors">
+                                    View Profile
+                                </button>
+                                <button class="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                                    Message
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Customer Card 3 -->
+                    <div class="customer-card bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-green-500 to-green-700 flex items-center justify-center text-white font-semibold text-lg">
+                                        MB
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-800 dark:text-white">Michael Brown</h3>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400">michael@example.com</p>
+                                    </div>
+                                </div>
+                                <div class="relative">
+                                    <button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div class="text-center">
+                                    <p class="text-2xl font-bold text-gray-800 dark:text-white">3</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">Orders</p>
+                                </div>
+                                <div class="text-center">
+                                    <p class="text-2xl font-bold text-gray-800 dark:text-white">$458</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">Total Spent</p>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-gray-600 dark:text-gray-400">Customer Value</span>
+                                    <span class="font-medium text-gray-800 dark:text-white">New</span>
+                                </div>
+                                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                    <div class="bg-yellow-600 h-2 rounded-full" style="width: 30%"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                <span class="segment-tag bg-purple-100 dark:bg-purple-900/20 text-purple-800 dark:text-purple-400">
+                                    New
+                                </span>
+                                <span class="segment-tag bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-400">
+                                    At Risk
+                                </span>
+                            </div>
+                            
+                            <div class="flex justify-between">
+                                <button class="px-3 py-1.5 text-sm bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors">
+                                    View Profile
+                                </button>
+                                <button class="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                                    Message
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div class="mt-6 flex items-center justify-between">
+                    <div class="text-sm text-gray-700 dark:text-gray-300">
+                        Showing <span class="font-medium">1</span> to <span class="font-medium">3</span> of <span class="font-medium">3,214</span> customers
+                    </div>
+                    <div class="flex space-x-2">
+                        <button class="px-3 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors flex items-center">
+                            <i class="fas fa-chevron-left mr-1"></i>
+                            <span>Previous</span>
+                        </button>
+                        <button class="px-3 py-2 rounded-lg bg-primary-600 text-white font-medium hover:bg-primary-700 transition-colors">
+                            1
+                        </button>
+                        <button class="px-3 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                            2
+                        </button>
+                        <button class="px-3 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                            3
+                        </button>
+                        <button class="px-3 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors flex items-center">
+                            <span>Next</span>
+                            <i class="fas fa-chevron-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            
+            // Save theme preference to localStorage
+            if (document.documentElement.classList.contains('dark')) {
+                localStorage.setItem('theme', 'dark');
+            } else {
+                localStorage.setItem('theme', 'light');
+            }
+        });
+        
+        // Check for saved theme preference
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+        }
+
+        // Mobile Menu Toggle
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const sidebar = document.querySelector('.w-64');
+        
+        mobileMenuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('hidden');
+            sidebar.classList.toggle('absolute');
+            sidebar.classList.toggle('inset-y-0');
+            sidebar.classList.toggle('left-0');
+        });
+
+        // Customer card interaction
+        const customerCards = document.querySelectorAll('.customer-card');
+        customerCards.forEach(card => {
+            card.addEventListener('click', function(e) {
+                // Don't trigger if clicking on buttons
+                if (!e.target.closest('button')) {
+                    const viewProfileBtn = this.querySelector('button:first-child');
+                    if (viewProfileBtn) {
+                        viewProfileBtn.click();
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

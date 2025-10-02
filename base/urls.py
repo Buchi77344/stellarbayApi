@@ -18,4 +18,11 @@ urlpatterns = [
     path('api/proxy/test/', views.APIProxyView.as_view(), name='api-proxy'),
     path('api/user/profile/', views.UserProfileView.as_view(), name='user-profile'),
     path('api/quick-actions/', views.QuickActionView.as_view(), name='quick-actions'),
+    path('product/', views.product, name='product'),
+    path('dashboard/', views.dash, name='dashboard'),
+    path('customer/', views.customer, name='customer'),
+    path('orders/', views.orders, name='orders'),
+    path('analysis/', views.analysis, name='analysis'),
+    path('discount/', views.discount, name='discount'),
+    path('settings/', views.settings, name='settings'),
 ]

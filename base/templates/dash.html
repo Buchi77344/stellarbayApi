@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-commerce CMS Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .sidebar-transition {
+            transition: all 0.3s ease-in-out;
+        }
+        .stats-card:hover {
+            transform: translateY(-5px);
+            transition: transform 0.3s ease;
+        }
+        .chart-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <div class="sidebar-transition w-64 bg-white dark:bg-gray-800 shadow-lg z-10 flex flex-col">
+            <!-- Logo -->
+            <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 rounded-lg bg-gradient-to-r from-primary-500 to-primary-700 flex items-center justify-center">
+                        <i class="fas fa-shopping-bag text-white text-sm"></i>
+                    </div>
+                    <span class="text-xl font-bold text-gray-800 dark:text-white">Stelllarbay</span>
+                </div>
+                <button id="sidebarToggle" class="lg:hidden text-gray-500 dark:text-gray-400">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Navigation -->
+<div class="flex-1 px-4 py-6">
+    <ul class="space-y-2">
+        <li>
+            <a href="{% url 'dashboard' %}" class="flex items-center space-x-3 p-3 rounded-xl bg-primary-50 dark:bg-gray-700 text-primary-600 dark:text-primary-400 font-medium">
+                <i class="fas fa-home w-5 text-center"></i>
+                <span>Dashboard</span>
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'product' %}" class="flex items-center space-x-3 p-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                <i class="fas fa-box w-5 text-center"></i>
+                <span>Products</span>
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'orders' %}" class="flex items-center space-x-3 p-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                <i class="fas fa-shopping-cart w-5 text-center"></i>
+                <span>Orders</span>
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'customer' %}" class="flex items-center space-x-3 p-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                <i class="fas fa-users w-5 text-center"></i>
+                <span>Customers</span>
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'analysis' %}" class="flex items-center space-x-3 p-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                <i class="fas fa-chart-bar w-5 text-center"></i>
+                <span>Analytics</span>
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'discount' %}" class="flex items-center space-x-3 p-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                <i class="fas fa-tags w-5 text-center"></i>
+                <span>Discounts</span>
+            </a>
+        </li>
+        <li>
+    <a href="{% url 'settings' %}" class="flex items-center space-x-3 p-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+        <i class="fas fa-cog w-5 text-center"></i>
+        <span>Settings</span>
+    </a>
+</li>
+
+    </ul>
+</div>
+
+
+            <!-- User Profile -->
+            <div class="p-4 border-t border-gray-200 dark:border-gray-700">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-r from-primary-500 to-primary-700 flex items-center justify-center text-white font-semibold">
+                        JD
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-gray-900 dark:text-white truncate">John Doe</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 truncate">Admin</p>
+                    </div>
+                    <button class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header -->
+            <header class="bg-white dark:bg-gray-800 shadow-sm z-10">
+                <div class="flex items-center justify-between px-6 py-4">
+                    <div class="flex items-center">
+                        <button id="mobileMenuToggle" class="lg:hidden text-gray-500 dark:text-gray-400 mr-4">
+                            <i class="fas fa-bars text-xl"></i>
+                        </button>
+                        <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Dashboard</h1>
+                    </div>
+
+                    <div class="flex items-center space-x-6">
+                        <!-- Search Bar -->
+                        <div class="hidden md:flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg px-3 py-2">
+                            <i class="fas fa-search text-gray-400 mr-2"></i>
+                            <input type="text" placeholder="Search..." class="bg-transparent border-none focus:outline-none focus:ring-0 text-sm w-64">
+                        </div>
+
+                        <!-- Theme Toggle -->
+                        <button id="themeToggle" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+                            <i class="fas fa-moon dark:hidden"></i>
+                            <i class="fas fa-sun hidden dark:block"></i>
+                        </button>
+
+                        <!-- Notifications -->
+                        <button class="relative text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+                            <i class="fas fa-bell text-xl"></i>
+                            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
+                        </button>
+
+                        <!-- User Menu (Mobile) -->
+                        <div class="md:hidden">
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-r from-primary-500 to-primary-700 flex items-center justify-center text-white font-semibold text-sm">
+                                JD
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Content -->
+            <main class="flex-1 overflow-y-auto p-6">
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="stats-card bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-500 dark:text-blue-400 mr-4">
+                                <i class="fas fa-shopping-cart text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Total Orders</p>
+                                <h3 class="text-2xl font-bold text-gray-800 dark:text-white">1,254</h3>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center text-sm">
+                            <span class="text-green-500 flex items-center">
+                                <i class="fas fa-arrow-up mr-1"></i> 12.5%
+                            </span>
+                            <span class="text-gray-500 dark:text-gray-400 ml-2">from last month</span>
+                        </div>
+                    </div>
+
+                    <div class="stats-card bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-500 dark:text-green-400 mr-4">
+                                <i class="fas fa-dollar-sign text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Total Revenue</p>
+                                <h3 class="text-2xl font-bold text-gray-800 dark:text-white">$42,587</h3>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center text-sm">
+                            <span class="text-green-500 flex items-center">
+                                <i class="fas fa-arrow-up mr-1"></i> 8.3%
+                            </span>
+                            <span class="text-gray-500 dark:text-gray-400 ml-2">from last month</span>
+                        </div>
+                    </div>
+
+                    <div class="stats-card bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-lg bg-purple-50 dark:bg-purple-900/20 text-purple-500 dark:text-purple-400 mr-4">
+                                <i class="fas fa-users text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Customers</p>
+                                <h3 class="text-2xl font-bold text-gray-800 dark:text-white">3,214</h3>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center text-sm">
+                            <span class="text-green-500 flex items-center">
+                                <i class="fas fa-arrow-up mr-1"></i> 5.7%
+                            </span>
+                            <span class="text-gray-500 dark:text-gray-400 ml-2">from last month</span>
+                        </div>
+                    </div>
+
+                    <div class="stats-card bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-lg bg-orange-50 dark:bg-orange-900/20 text-orange-500 dark:text-orange-400 mr-4">
+                                <i class="fas fa-box-open text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Products</p>
+                                <h3 class="text-2xl font-bold text-gray-800 dark:text-white">856</h3>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center text-sm">
+                            <span class="text-red-500 flex items-center">
+                                <i class="fas fa-arrow-down mr-1"></i> 2.1%
+                            </span>
+                            <span class="text-gray-500 dark:text-gray-400 ml-2">from last month</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts and Tables -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Sales Chart -->
+                    <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-lg font-semibold text-gray-800 dark:text-white">Sales Overview</h2>
+                            <div class="flex space-x-2">
+                                <button class="px-3 py-1 text-xs bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 rounded-lg font-medium">Monthly</button>
+                                <button class="px-3 py-1 text-xs text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium">Weekly</button>
+                                <button class="px-3 py-1 text-xs text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium">Daily</button>
+                            </div>
+                        </div>
+                        <div class="chart-container h-80 rounded-lg flex items-center justify-center text-white">
+                            <div class="text-center">
+                                <i class="fas fa-chart-line text-4xl mb-2"></i>
+                                <p>Sales Chart Visualization</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-lg font-semibold text-gray-800 dark:text-white">Recent Activity</h2>
+                            <a href="#" class="text-primary-600 dark:text-primary-400 text-sm font-medium">View All</a>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center text-green-600 dark:text-green-400 mt-1">
+                                    <i class="fas fa-shopping-cart text-xs"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-800 dark:text-white">New order received</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">Order #ORD-7842 from John Smith</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">2 hours ago</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 dark:text-blue-400 mt-1">
+                                    <i class="fas fa-user text-xs"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-800 dark:text-white">New customer registered</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">Sarah Johnson joined the store</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">5 hours ago</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center text-purple-600 dark:text-purple-400 mt-1">
+                                    <i class="fas fa-box text-xs"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-800 dark:text-white">Product out of stock</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">Wireless Headphones is out of stock</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">1 day ago</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center text-orange-600 dark:text-orange-400 mt-1">
+                                    <i class="fas fa-tag text-xs"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-800 dark:text-white">New promotion created</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">Summer Sale 2023 is now active</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">2 days ago</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Orders & Top Products -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                    <!-- Recent Orders -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-lg font-semibold text-gray-800 dark:text-white">Recent Orders</h2>
+                            <a href="#" class="text-primary-600 dark:text-primary-400 text-sm font-medium">View All</a>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="text-left text-xs text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                                        <th class="pb-3 font-medium">Order ID</th>
+                                        <th class="pb-3 font-medium">Customer</th>
+                                        <th class="pb-3 font-medium">Date</th>
+                                        <th class="pb-3 font-medium">Amount</th>
+                                        <th class="pb-3 font-medium">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                                    <tr>
+                                        <td class="py-3 text-sm text-gray-800 dark:text-white">#ORD-7842</td>
+                                        <td class="py-3 text-sm text-gray-800 dark:text-white">John Smith</td>
+                                        <td class="py-3 text-sm text-gray-500 dark:text-gray-400">12 Jun, 2023</td>
+                                        <td class="py-3 text-sm text-gray-800 dark:text-white">$245.99</td>
+                                        <td class="py-3">
+                                            <span class="px-2 py-1 text-xs rounded-full bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400">Completed</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-3 text-sm text-gray-800 dark:text-white">#ORD-7841</td>
+                                        <td class="py-3 text-sm text-gray-800 dark:text-white">Sarah Johnson</td>
+                                        <td class="py-3 text-sm text-gray-500 dark:text-gray-400">11 Jun, 2023</td>
+                                        <td class="py-3 text-sm text-gray-800 dark:text-white">$145.50</td>
+                                        <td class="py-3">
+                                            <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-400">Pending</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-3 text-sm text-gray-800 dark:text-white">#ORD-7840</td>
+                                        <td class="py-3 text-sm text-gray-800 dark:text-white">Michael Brown</td>
+                                        <td class="py-3 text-sm text-gray-500 dark:text-gray-400">11 Jun, 2023</td>
+                                        <td class="py-3 text-sm text-gray-800 dark:text-white">$89.99</td>
+                                        <td class="py-3">
+                                            <span class="px-2 py-1 text-xs rounded-full bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-400">Processing</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Top Products -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-lg font-semibold text-gray-800 dark:text-white">Top Products</h2>
+                            <a href="#" class="text-primary-600 dark:text-primary-400 text-sm font-medium">View All</a>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                                        <i class="fas fa-mobile-alt text-gray-500 dark:text-gray-400"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-800 dark:text-white">Smartphone X</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">Electronics</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-sm font-medium text-gray-800 dark:text-white">$899</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">124 sales</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                                        <i class="fas fa-tshirt text-gray-500 dark:text-gray-400"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-800 dark:text-white">Cotton T-Shirt</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">Fashion</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-sm font-medium text-gray-800 dark:text-white">$24.99</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">98 sales</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                                        <i class="fas fa-headphones text-gray-500 dark:text-gray-400"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-800 dark:text-white">Wireless Headphones</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">Electronics</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-sm font-medium text-gray-800 dark:text-white">$199</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">76 sales</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                                        <i class="fas fa-shoe-prints text-gray-500 dark:text-gray-400"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-800 dark:text-white">Running Shoes</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">Sports</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-sm font-medium text-gray-800 dark:text-white">$129</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">64 sales</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            
+            // Save theme preference to localStorage
+            if (document.documentElement.classList.contains('dark')) {
+                localStorage.setItem('theme', 'dark');
+            } else {
+                localStorage.setItem('theme', 'light');
+            }
+        });
+        
+        // Check for saved theme preference
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+        }
+
+        // Mobile Menu Toggle
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const sidebar = document.querySelector('.sidebar-transition');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        
+        mobileMenuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('hidden');
+            sidebar.classList.toggle('absolute');
+            sidebar.classList.toggle('inset-y-0');
+            sidebar.classList.toggle('left-0');
+        });
+        
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.add('hidden');
+            sidebar.classList.remove('absolute', 'inset-y-0', 'left-0');
+        });
+    </script>
+</body>
+</html>

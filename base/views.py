@@ -323,3 +323,28 @@ def Index(request):
 
 def login(request):
     return render(request, 'login.html')
+
+def product(request):
+    return render(request, 'product.html')
+
+
+def dash(request):
+    return render(request, 'dash.html')
+
+def customer(request):
+    return render(request, 'customer.html')
+
+
+def orders(request):
+    return render(request, 'orders.html')
+
+def analysis(request):
+    return render(request, 'analysis.html')
+
+
+def discount(request):
+    return render(request, 'discount.html')
+
+
+def settings(request):
+    return render(request, 'settings.html')
