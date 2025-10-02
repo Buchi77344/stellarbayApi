@@ -3,9 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="StellarBay API Platform - Manage your Django API endpoints and monitor performance" />
   <title>StellarBay — API Platform</title>
 
-  <!-- Tailwind Play CDN -->
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -21,7 +22,7 @@
     }
   </script>
 
-  <!-- Optional: Prism for code highlighting -->
+  <!-- Prism for code highlighting -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
@@ -80,6 +81,15 @@
       opacity: 0.6;
       pointer-events: none;
     }
+    
+    /* Responsive sidebar */
+    @media (max-width: 1024px) {
+      #sidebar {
+        position: fixed;
+        height: 100vh;
+        z-index: 40;
+      }
+    }
   </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 antialiased transition-colors duration-300">
@@ -88,7 +98,7 @@
   <div class="min-h-screen flex">
 
     <!-- Sidebar -->
-    <aside id="sidebar" class="w-72 bg-white dark:bg-slate-800 shadow-lg border-r border-slate-200 dark:border-slate-700 transition-all duration-300 transform z-10">
+    <aside id="sidebar" class="w-72 bg-white dark:bg-slate-800 shadow-lg border-r border-slate-200 dark:border-slate-700 transition-all duration-300 transform lg:translate-x-0 -translate-x-full fixed lg:relative z-40 h-screen">
       <div class="px-6 py-5 flex items-center gap-3">
         <div class="p-2 gradient-bg rounded-xl shadow text-white">
           <i class="fas fa-code text-lg"></i>
@@ -119,6 +129,12 @@
           <i class="fas fa-book text-emerald-500 w-5 text-center"></i>
           <span>Documentation</span>
         </button>
+        <a href="{% url 'dashboard' %}">
+        <button  class="tab-btn w-full flex items-center gap-3 px-3 py-2 mt-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+          <i class="fas fa-shop text-sky-500 w-5 text-center"></i>
+          <span>Stellarbay  CMS</span>
+        </button>
+        </a>
       </nav>
 
       <div class="mt-auto px-6 py-4">
@@ -129,31 +145,37 @@
           </button>
         </div>
         <div class="mt-3 text-xs text-slate-400">Status: <span id="apiStatus" class="font-medium"><i class="fas fa-circle text-green-500 mr-1"></i>Connected</span></div>
+        <button id="logoutBtn" class="mt-4 w-full px-3 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+          <i class="fas fa-sign-out-alt mr-2"></i>Logout
+        </button>
       </div>
     </aside>
 
+    <!-- Mobile overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/50 z-30 lg:hidden hidden"></div>
+
     <!-- Main -->
-    <main class="flex-1 p-8 overflow-y-auto transition-all duration-300">
+    <main class="flex-1 p-4 lg:p-8 overflow-y-auto transition-all duration-300 w-full">
       <!-- Top bar -->
       <header class="flex items-center justify-between gap-4 mb-6">
         <div class="flex items-center gap-4">
-          <button id="sidebarToggle" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+          <button id="sidebarToggle" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 lg:hidden">
             <i class="fas fa-bars text-slate-600 dark:text-slate-200"></i>
           </button>
           <div>
-            <h1 class="text-2xl font-bold">API Platform</h1>
+            <h1 class="text-xl lg:text-2xl font-bold">API Platform</h1>
             <p class="text-sm text-slate-500 dark:text-slate-400">Manage your Django API endpoints and monitor performance.</p>
           </div>
         </div>
 
         <div class="flex items-center gap-3">
-          <div class="hidden md:flex items-center gap-3 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl px-3 py-1">
+          <div class="hidden sm:flex items-center gap-3 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl px-3 py-1">
             <i class="fas fa-search text-slate-400"></i>
-            <input id="globalSearch" placeholder="Search endpoints, docs..." class="bg-transparent outline-none text-sm w-64" />
+            <input id="globalSearch" placeholder="Search endpoints, docs..." class="bg-transparent outline-none text-sm w-32 lg:w-64" />
           </div>
 
-          <button id="newEndpointBtn" class="px-3 py-2 bg-indigo-600 text-white rounded-lg hover:shadow-lg transition-all">
-            <i class="fas fa-plus mr-2"></i>New Endpoint
+          <button id="newEndpointBtn" class="px-3 py-2 bg-indigo-600 text-white rounded-lg hover:shadow-lg transition-all text-sm lg:text-base">
+            <i class="fas fa-plus mr-2"></i><span class="hidden sm:inline">New Endpoint</span>
           </button>
         </div>
       </header>
@@ -162,15 +184,15 @@
       <section id="contentArea">
         <!-- Dashboard -->
         <div data-pane="dashboard" class="pane anim-slide-in">
-          <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-            <div class="rounded-2xl bg-white dark:bg-slate-800 p-6 shadow">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6">
+            <div class="rounded-2xl bg-white dark:bg-slate-800 p-4 lg:p-6 shadow">
               <div class="flex items-center justify-between">
                 <div>
                   <div class="text-xs text-slate-500">Active Endpoints</div>
-                  <div id="totalEndpoints" class="font-bold text-2xl">-</div>
+                  <div id="totalEndpoints" class="font-bold text-xl lg:text-2xl">-</div>
                 </div>
-                <div class="p-3 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600">
-                  <i class="fas fa-server"></i>
+                <div class="p-2 lg:p-3 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600">
+                  <i class="fas fa-server text-sm lg:text-base"></i>
                 </div>
               </div>
               <div class="mt-2 text-xs text-slate-500">
@@ -178,14 +200,14 @@
               </div>
             </div>
 
-            <div class="rounded-2xl bg-white dark:bg-slate-800 p-6 shadow">
+            <div class="rounded-2xl bg-white dark:bg-slate-800 p-4 lg:p-6 shadow">
               <div class="flex items-center justify-between">
                 <div>
                   <div class="text-xs text-slate-500">API Requests</div>
-                  <div id="reqCount" class="font-bold text-2xl">-</div>
+                  <div id="reqCount" class="font-bold text-xl lg:text-2xl">-</div>
                 </div>
-                <div class="p-3 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600">
-                  <i class="fas fa-chart-line"></i>
+                <div class="p-2 lg:p-3 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600">
+                  <i class="fas fa-chart-line text-sm lg:text-base"></i>
                 </div>
               </div>
               <div class="mt-2 text-xs text-slate-500">
@@ -193,14 +215,14 @@
               </div>
             </div>
 
-            <div class="rounded-2xl bg-white dark:bg-slate-800 p-6 shadow">
+            <div class="rounded-2xl bg-white dark:bg-slate-800 p-4 lg:p-6 shadow">
               <div class="flex items-center justify-between">
                 <div>
                   <div class="text-xs text-slate-500">Success Rate</div>
-                  <div id="successRate" class="font-bold text-2xl">-</div>
+                  <div id="successRate" class="font-bold text-xl lg:text-2xl">-</div>
                 </div>
-                <div class="p-3 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600">
-                  <i class="fas fa-check-circle"></i>
+                <div class="p-2 lg:p-3 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600">
+                  <i class="fas fa-check-circle text-sm lg:text-base"></i>
                 </div>
               </div>
               <div class="mt-2 text-xs text-slate-500">
@@ -208,14 +230,14 @@
               </div>
             </div>
 
-            <div class="rounded-2xl bg-white dark:bg-slate-800 p-6 shadow">
+            <div class="rounded-2xl bg-white dark:bg-slate-800 p-4 lg:p-6 shadow">
               <div class="flex items-center justify-between">
                 <div>
                   <div class="text-xs text-slate-500">Avg Response Time</div>
-                  <div id="avgResponseTime" class="font-bold text-2xl">-</div>
+                  <div id="avgResponseTime" class="font-bold text-xl lg:text-2xl">-</div>
                 </div>
-                <div class="p-3 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600">
-                  <i class="fas fa-tachometer-alt"></i>
+                <div class="p-2 lg:p-3 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600">
+                  <i class="fas fa-tachometer-alt text-sm lg:text-base"></i>
                 </div>
               </div>
               <div class="mt-2 text-xs text-slate-500">
@@ -224,10 +246,10 @@
             </div>
           </div>
 
-          <div class="grid md:grid-cols-2 gap-6">
-            <div class="rounded-2xl bg-white dark:bg-slate-800 p-6 shadow">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+            <div class="rounded-2xl bg-white dark:bg-slate-800 p-4 lg:p-6 shadow">
               <h2 class="font-semibold text-lg mb-4">Recent Activity</h2>
-              <div id="recentActivity" class="space-y-4">
+              <div id="recentActivity" class="space-y-4 max-h-80 overflow-y-auto">
                 <div class="flex items-center justify-center py-8">
                   <i class="fas fa-spinner fa-spin text-slate-400 mr-2"></i>
                   <span class="text-slate-500">Loading recent activity...</span>
@@ -235,27 +257,27 @@
               </div>
             </div>
 
-            <div class="rounded-2xl bg-white dark:bg-slate-800 p-6 shadow">
+            <div class="rounded-2xl bg-white dark:bg-slate-800 p-4 lg:p-6 shadow">
               <h2 class="font-semibold text-lg mb-4">Quick Actions</h2>
-              <div class="grid grid-cols-2 gap-4">
-                <button id="quickAddEndpoint" class="p-4 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-colors text-left">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:gap-4">
+                <button id="quickAddEndpoint" class="p-3 lg:p-4 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-colors text-left">
                   <i class="fas fa-plus text-indigo-600 mb-2"></i>
-                  <div class="font-medium">Add Endpoint</div>
+                  <div class="font-medium text-sm lg:text-base">Add Endpoint</div>
                   <div class="text-xs text-slate-500 mt-1">Create a new API endpoint</div>
                 </button>
-                <button id="quickTestAll" class="p-4 rounded-lg bg-sky-50 dark:bg-sky-900/20 hover:bg-sky-100 dark:hover:bg-sky-900/30 transition-colors text-left">
+                <button id="quickTestAll" class="p-3 lg:p-4 rounded-lg bg-sky-50 dark:bg-sky-900/20 hover:bg-sky-100 dark:hover:bg-sky-900/30 transition-colors text-left">
                   <i class="fas fa-flask text-sky-600 mb-2"></i>
-                  <div class="font-medium">Test All APIs</div>
+                  <div class="font-medium text-sm lg:text-base">Test All APIs</div>
                   <div class="text-xs text-slate-500 mt-1">Run tests on all endpoints</div>
                 </button>
-                <button id="quickGenerateDocs" class="p-4 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors text-left">
+                <button id="quickGenerateDocs" class="p-3 lg:p-4 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors text-left">
                   <i class="fas fa-book text-emerald-600 mb-2"></i>
-                  <div class="font-medium">Generate Docs</div>
+                  <div class="font-medium text-sm lg:text-base">Generate Docs</div>
                   <div class="text-xs text-slate-500 mt-1">Create API documentation</div>
                 </button>
-                <button id="quickExportConfig" class="p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors text-left">
+                <button id="quickExportConfig" class="p-3 lg:p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors text-left">
                   <i class="fas fa-cog text-amber-600 mb-2"></i>
-                  <div class="font-medium">Export Config</div>
+                  <div class="font-medium text-sm lg:text-base">Export Config</div>
                   <div class="text-xs text-slate-500 mt-1">Export API configuration</div>
                 </button>
               </div>
@@ -265,18 +287,18 @@
 
         <!-- API Endpoints -->
         <div data-pane="api-endpoints" class="pane hidden anim-slide-in">
-          <div class="flex items-center justify-between mb-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
               <h2 class="font-semibold text-xl">API Endpoints</h2>
               <p class="text-sm text-slate-500">Manage your Django REST API endpoints</p>
             </div>
-            <div class="flex items-center gap-3">
-              <select id="statusFilter" class="px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+            <div class="flex items-center gap-3 flex-wrap">
+              <select id="statusFilter" class="px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm">
                 <option value="all">All Status</option>
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
               </select>
-              <button id="refreshEndpoints" class="px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+              <button id="refreshEndpoints" class="px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm">
                 <i class="fas fa-sync-alt mr-2"></i>Refresh
               </button>
             </div>
@@ -295,38 +317,38 @@
 
         <!-- API Playground -->
         <div data-pane="api-playground" class="pane hidden anim-slide-in">
-          <div class="grid lg:grid-cols-2 gap-6">
-            <div class="rounded-2xl bg-white dark:bg-slate-800 p-6 shadow">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+            <div class="rounded-2xl bg-white dark:bg-slate-800 p-4 lg:p-6 shadow">
               <h2 class="font-semibold text-lg mb-4">API Playground</h2>
               <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Test endpoints with method, headers & payload. Response will show formatted JSON or text.</p>
 
               <div class="space-y-4">
-                <div class="flex gap-2">
-                  <select id="httpMethod" class="px-3 py-2 rounded-lg border dark:bg-slate-700 dark:border-slate-600">
+                <div class="flex flex-col sm:flex-row gap-2">
+                  <select id="httpMethod" class="px-3 py-2 rounded-lg border dark:bg-slate-700 dark:border-slate-600 text-sm">
                     <option>GET</option>
                     <option>POST</option>
                     <option>PUT</option>
                     <option>PATCH</option>
                     <option>DELETE</option>
                   </select>
-                  <input id="apiUrl" placeholder="https://api.example.com/users" class="flex-1 px-3 py-2 rounded-lg border dark:bg-slate-700 dark:border-slate-600" />
+                  <input id="apiUrl" placeholder="https://api.example.com/users" class="flex-1 px-3 py-2 rounded-lg border dark:bg-slate-700 dark:border-slate-600 text-sm" />
                 </div>
 
                 <div>
                   <label class="text-xs text-slate-500">Headers (JSON)</label>
-                  <textarea id="apiHeaders" rows="3" class="w-full mt-1 px-3 py-2 rounded-lg border dark:bg-slate-700 dark:border-slate-600 mono" placeholder='{"Content-Type":"application/json"}'></textarea>
+                  <textarea id="apiHeaders" rows="3" class="w-full mt-1 px-3 py-2 rounded-lg border dark:bg-slate-700 dark:border-slate-600 mono text-sm" placeholder='{"Content-Type":"application/json"}'></textarea>
                 </div>
 
                 <div>
                   <label class="text-xs text-slate-500">Body (JSON) — optional</label>
-                  <textarea id="apiBody" rows="5" class="w-full mt-1 px-3 py-2 rounded-lg border dark:bg-slate-700 dark:border-slate-600 mono" placeholder='{"name":"John"}'></textarea>
+                  <textarea id="apiBody" rows="5" class="w-full mt-1 px-3 py-2 rounded-lg border dark:bg-slate-700 dark:border-slate-600 mono text-sm" placeholder='{"name":"John"}'></textarea>
                 </div>
 
-                <div class="flex items-center gap-2">
-                  <button id="sendReq" class="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors">
+                <div class="flex flex-col sm:flex-row items-center gap-2">
+                  <button id="sendReq" class="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors text-sm w-full sm:w-auto">
                     <i class="fas fa-paper-plane mr-2"></i>Send Request
                   </button>
-                  <button id="clearResp" class="px-4 py-2 bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
+                  <button id="clearResp" class="px-4 py-2 bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors text-sm w-full sm:w-auto">
                     <i class="fas fa-broom mr-2"></i>Clear
                   </button>
                   <div class="text-sm text-slate-500 ml-auto">Timeout: <span id="timeoutLabel">10s</span></div>
@@ -334,21 +356,21 @@
               </div>
             </div>
 
-            <div class="rounded-2xl bg-white dark:bg-slate-800 p-6 shadow flex flex-col">
+            <div class="rounded-2xl bg-white dark:bg-slate-800 p-4 lg:p-6 shadow flex flex-col">
               <div class="flex items-center justify-between">
                 <h3 class="font-semibold">Response</h3>
                 <div class="text-xs text-slate-400">Status: <span id="respStatus">—</span></div>
               </div>
 
-              <div id="respBox" class="mt-4 p-3 border rounded-lg bg-slate-50 dark:bg-slate-900 overflow-auto flex-1">
+              <div id="respBox" class="mt-4 p-3 border rounded-lg bg-slate-50 dark:bg-slate-900 overflow-auto flex-1 min-h-[200px]">
                 <pre id="respContent" class="mono text-sm whitespace-pre-wrap">No request yet — try sending one.</pre>
               </div>
 
-              <div class="mt-3 flex items-center gap-2">
-                <button id="copyResp" class="px-3 py-1 rounded bg-indigo-600 text-white hover:bg-indigo-700 transition-colors">
+              <div class="mt-3 flex flex-col sm:flex-row items-center gap-2">
+                <button id="copyResp" class="px-3 py-1 rounded bg-indigo-600 text-white hover:bg-indigo-700 transition-colors text-sm w-full sm:w-auto">
                   <i class="fas fa-copy mr-1"></i>Copy Response
                 </button>
-                <button id="saveCurl" class="px-3 py-1 rounded border hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                <button id="saveCurl" class="px-3 py-1 rounded border hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-sm w-full sm:w-auto">
                   <i class="fas fa-terminal mr-1"></i>Copy cURL
                 </button>
                 <div class="text-sm text-slate-400 ml-auto">Requests: <span id="sentCount">0</span></div>
@@ -359,11 +381,11 @@
 
         <!-- Documentation -->
         <div data-pane="documentation" class="pane hidden anim-slide-in">
-          <div class="rounded-2xl bg-white dark:bg-slate-800 p-6 shadow">
+          <div class="rounded-2xl bg-white dark:bg-slate-800 p-4 lg:p-6 shadow">
             <h2 class="font-semibold text-lg mb-4">API Documentation</h2>
             <p class="text-sm text-slate-500 mb-6">Comprehensive guide to using the StellarBay API platform.</p>
 
-            <div class="grid md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
               <div>
                 <h4 class="font-medium mb-3">Getting Started</h4>
                 <ol class="text-sm text-slate-500 list-decimal ml-5 space-y-2">
@@ -377,13 +399,13 @@
 
               <div>
                 <h4 class="font-medium mb-3">Available Endpoints</h4>
-                <div class="bg-slate-50 dark:bg-slate-900 rounded-lg p-4">
-                  <div class="grid grid-cols-12 gap-2 text-xs font-medium text-slate-500 mb-2">
+                <div class="bg-slate-50 dark:bg-slate-900 rounded-lg p-4 overflow-x-auto">
+                  <div class="grid grid-cols-12 gap-2 text-xs font-medium text-slate-500 mb-2 min-w-[500px]">
                     <div class="col-span-2">Method</div>
                     <div class="col-span-6">Endpoint</div>
                     <div class="col-span-4">Description</div>
                   </div>
-                  <div id="apiEndpointsList" class="space-y-2">
+                  <div id="apiEndpointsList" class="space-y-2 min-w-[500px]">
                     <!-- Dynamic endpoints will be loaded here -->
                   </div>
                 </div>
@@ -406,18 +428,18 @@
   </div>
 
   <!-- Endpoint Modal -->
-  <div id="endpointModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
-    <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-2xl p-6 shadow-lg">
+  <div id="endpointModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-2xl p-4 lg:p-6 shadow-lg max-h-[90vh] overflow-y-auto">
       <h3 class="font-semibold text-lg mb-4" id="modalTitle">Create New Endpoint</h3>
       <form id="endpointForm" class="space-y-4">
         <input type="hidden" id="endpointId">
         <div>
           <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Name</label>
-          <input type="text" id="endpointName" required class="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg dark:bg-slate-700">
+          <input type="text" id="endpointName" required class="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg dark:bg-slate-700 text-sm">
         </div>
         <div>
           <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Method</label>
-          <select id="endpointMethod" required class="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg dark:bg-slate-700">
+          <select id="endpointMethod" required class="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg dark:bg-slate-700 text-sm">
             <option value="GET">GET</option>
             <option value="POST">POST</option>
             <option value="PUT">PUT</option>
@@ -427,17 +449,17 @@
         </div>
         <div>
           <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">URL</label>
-          <input type="text" id="endpointUrl" required class="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg dark:bg-slate-700" placeholder="/api/endpoint/">
+          <input type="text" id="endpointUrl" required class="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg dark:bg-slate-700 text-sm" placeholder="/api/endpoint/">
         </div>
         <div>
           <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Description</label>
-          <textarea id="endpointDescription" rows="3" class="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg dark:bg-slate-700"></textarea>
+          <textarea id="endpointDescription" rows="3" class="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg dark:bg-slate-700 text-sm"></textarea>
         </div>
         <div class="flex items-center gap-2 pt-4">
-          <button type="submit" class="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+          <button type="submit" class="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm">
             <i class="fas fa-save mr-2"></i>Save
           </button>
-          <button type="button" id="cancelModal" class="px-4 py-2 bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
+          <button type="button" id="cancelModal" class="px-4 py-2 bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors text-sm">
             Cancel
           </button>
         </div>
@@ -448,17 +470,17 @@
   <!-- Templates -->
   <template id="endpointTemplate">
     <div class="endpoint-card bg-white dark:bg-slate-800 p-4 rounded-2xl shadow border-l-4 border-indigo-500">
-      <div class="flex items-start justify-between">
+      <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div class="flex-1">
-          <div class="flex items-center gap-2 mb-2">
+          <div class="flex items-center gap-2 mb-2 flex-wrap">
             <span class="method-badge px-2 py-1 rounded text-xs font-medium"></span>
-            <h3 class="endpoint-title font-semibold"></h3>
+            <h3 class="endpoint-title font-semibold text-sm lg:text-base"></h3>
             <span class="status-indicator status-active"></span>
           </div>
           <p class="endpoint-desc text-sm text-slate-500 mb-3"></p>
-          <div class="endpoint-url font-mono text-xs bg-slate-100 dark:bg-slate-700 p-2 rounded"></div>
+          <div class="endpoint-url font-mono text-xs bg-slate-100 dark:bg-slate-700 p-2 rounded overflow-x-auto"></div>
         </div>
-        <div class="flex items-center gap-2 ml-4">
+        <div class="flex items-center gap-2 sm:ml-4 flex-wrap">
           <button class="endpoint-test-btn px-3 py-1 rounded text-xs bg-sky-600 text-white hover:bg-sky-700 transition-colors">
             <i class="fas fa-flask mr-1"></i>Test
           </button>
@@ -478,8 +500,8 @@
       <div class="p-2 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 mt-1">
         <i class="fas fa-plus text-xs"></i>
       </div>
-      <div>
-        <div class="font-medium activity-title"></div>
+      <div class="flex-1 min-w-0">
+        <div class="font-medium activity-title text-sm truncate"></div>
         <div class="text-sm text-slate-500 activity-details"></div>
         <div class="text-xs text-slate-400 activity-time"></div>
       </div>
@@ -492,7 +514,7 @@
     const API_BASE_URL = window.location.origin;
     let authToken = localStorage.getItem('authToken');
 
-    // API Service
+    // API Service with enhanced error handling
     const apiService = {
       async request(url, options = {}) {
         const config = {
@@ -510,21 +532,33 @@
         try {
           const response = await fetch(`${API_BASE_URL}${url}`, config);
           
+          // Handle 401 Unauthorized - redirect to login
           if (response.status === 401) {
-            // Token expired or invalid
             localStorage.removeItem('authToken');
-            window.location.reload();
-            return;
+            authToken = null;
+            // Redirect to login page
+            window.location.href = '/login/';
+            throw new Error('Authentication required');
           }
 
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
 
+          // Handle empty responses for DELETE requests
+          if (response.status === 204 || options.method === 'DELETE') {
+            return { success: true };
+          }
+
           return await response.json();
         } catch (error) {
           console.error('API request failed:', error);
-          showNotification('API request failed: ' + error.message, 'error');
+          
+          // Don't show notification for auth errors (already handled)
+          if (error.message !== 'Authentication required') {
+            showNotification('API request failed: ' + error.message, 'error');
+          }
+          
           throw error;
         }
       },
@@ -601,6 +635,7 @@
     const panes = document.querySelectorAll('.pane');
     const sidebar = document.getElementById('sidebar');
     const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
     const themeToggle = document.getElementById('themeToggle');
     const themeIcon = document.getElementById('themeIcon');
 
@@ -621,15 +656,25 @@
       } else if (id === 'documentation') {
         loadDocumentation();
       }
+
+      // Close sidebar on mobile when switching tabs
+      if (window.innerWidth < 1024) {
+        sidebar.classList.add('-translate-x-full');
+        sidebarOverlay.classList.add('hidden');
+      }
     }
 
     tabs.forEach(t => t.addEventListener('click', ()=> showPane(t.dataset.tab)));
     showPane('dashboard'); // default
 
     // Mobile sidebar toggle
-    sidebarToggle.addEventListener('click', () => {
+    function toggleSidebar() {
       sidebar.classList.toggle('-translate-x-full');
-    });
+      sidebarOverlay.classList.toggle('hidden');
+    }
+
+    sidebarToggle.addEventListener('click', toggleSidebar);
+    sidebarOverlay.addEventListener('click', toggleSidebar);
 
     // Theme toggle (persist in localStorage)
     const root = document.documentElement;
@@ -656,6 +701,15 @@
     }
     
     themeToggle.addEventListener('click', ()=> setTheme(!root.classList.contains('dark')));
+
+    // Logout functionality
+    const logoutBtn = document.getElementById('logoutBtn');
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('authToken');
+      authToken = null;
+      // Redirect to login page
+      window.location.href = '/login/';
+    });
 
     // Dashboard Functions
     async function loadDashboardStats() {
@@ -684,7 +738,7 @@
           activityContainer.innerHTML = '<p class="text-slate-500 text-center py-4">No recent activity</p>';
         }
       } catch (error) {
-        showNotification('Failed to load dashboard stats', 'error');
+        console.error('Failed to load dashboard stats:', error);
       }
     }
 
@@ -762,6 +816,12 @@
           showPane('api-playground');
           document.getElementById('apiUrl').value = endpoint.url;
           document.getElementById('httpMethod').value = endpoint.method;
+          
+          // Close sidebar on mobile
+          if (window.innerWidth < 1024) {
+            sidebar.classList.add('-translate-x-full');
+            sidebarOverlay.classList.add('hidden');
+          }
         });
         
         editBtn.addEventListener('click', () => {
@@ -1023,8 +1083,8 @@
           
           row.innerHTML = `
             <div class="col-span-2">${methodBadge}</div>
-            <div class="col-span-6 font-mono text-xs">${endpoint.url}</div>
-            <div class="col-span-4">${endpoint.description}</div>
+            <div class="col-span-6 font-mono text-xs truncate">${endpoint.url}</div>
+            <div class="col-span-4 truncate">${endpoint.description}</div>
           `;
           endpointsList.appendChild(row);
         });
@@ -1078,6 +1138,7 @@
       if(e.key === 'Escape') {
         if (window.innerWidth < 1024) {
           sidebar.classList.add('-translate-x-full');
+          sidebarOverlay.classList.add('hidden');
         }
         endpointModal.classList.add('hidden');
         endpointModal.classList.remove('flex');
@@ -1087,7 +1148,7 @@
     // Notification system
     function showNotification(message, type = 'info') {
       const notification = document.createElement('div');
-      notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 anim-slide-in ${
+      notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 anim-slide-in max-w-sm ${
         type === 'success' ? 'bg-green-500 text-white' :
         type === 'error' ? 'bg-red-500 text-white' :
         'bg-blue-500 text-white'
@@ -1099,7 +1160,7 @@
             type === 'error' ? 'fa-exclamation-circle' :
             'fa-info-circle'
           } mr-2"></i>
-          <span>${message}</span>
+          <span class="text-sm">${message}</span>
         </div>
       `;
       
@@ -1119,17 +1180,21 @@
     async function initApp() {
       // Check authentication
       if (!authToken) {
-        // Redirect to login or show login modal
-        showNotification('Please log in to access the API platform', 'error');
+        // Redirect to login page
+        window.location.href = '/login/';
         return;
       }
 
       // Load initial data
-      await loadDashboardStats();
-      await loadEndpoints();
-      Prism.highlightAll();
-      
-      showNotification('StellarBay API Platform loaded successfully', 'success');
+      try {
+        await loadDashboardStats();
+        await loadEndpoints();
+        Prism.highlightAll();
+        
+        showNotification('StellarBay API Platform loaded successfully', 'success');
+      } catch (error) {
+        console.error('Failed to initialize app:', error);
+      }
     }
 
     // Start the app when DOM is loaded
