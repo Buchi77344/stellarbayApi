@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-!rcd%))t0#5vu3_5k6_5kt4@qs*qmm+5a$8jp6kg2yb99q6_qs
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -136,7 +136,8 @@ AUTH_USER_MODEL = 'base.CustomUser'
 
 
 CORS_ALLOWED_ORIGINS = [
-    "https://invoicerep.onrender.com",
+    "https://stellarbayapi.onrender.com",
+    
     "http://127.0.0.1:5500",
     "http://localhost:5173",
     "https://yourfrontend.com",
@@ -148,7 +149,7 @@ CORS_ALLOWED_ORIGINS = [
 
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://invoicerep.onrender.com",
+    "https://stellarbayapi.onrender.com",
     "http://127.0.0.1:8000",
     "https://invoice-web-alpha.vercel.app",
     "http://localhost:8080",
