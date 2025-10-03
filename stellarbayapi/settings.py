@@ -46,6 +46,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -145,6 +146,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8000",
     "https://invoice-web-alpha.vercel.app",
     "http://localhost:8080",
+    "http://localhost:3001",
     "https://stellarbay-frontend.vercel.app"
 ]
 
@@ -154,6 +156,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:8000",
     "https://invoice-web-alpha.vercel.app",
     "http://localhost:8080",
+    "http://localhost:3001",
     "https://stellarbay-frontend.vercel.app"
 ]
 
