@@ -88,7 +88,7 @@ DATABASES = {
 }
 
 AUTHENTICATION_BACKENDS = [
-    'stellarbayapi.authentication.EmailBackend',  # adjust to your app name
+    'base.authentication.EmailBackend',  # adjust to your app name
     'django.contrib.auth.backends.ModelBackend',
 ]
 
