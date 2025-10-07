@@ -360,3 +360,150 @@ def discount(request):
 
 def settings(request):
     return render(request, 'settings.html')
+
+
+
+# ✅ PROFILE VIEWSET
+class ProfileViewSet(viewsets.ModelViewSet):
+    serializer_class = ProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Profile.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+# ✅ CATEGORY VIEWSET
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [AllowAny]
+    lookup_field = "slug"
+
+
+# ✅ PRODUCT VIEWSET
+class ProductViewSet(viewsets.ModelViewSet):
+    queryset = Product.objects.filter(is_active=True).select_related("category", "seller")
+    serializer_class = ProductSerializer
+    permission_classes = [AllowAny]
+    lookup_field = "slug"
+
+    def perform_create(self, serializer):
+        serializer.save(seller=self.request.user)
+
+    def get_queryset(self):
+        category_slug = self.request.query_params.get("category")
+        if category_slug:
+            return self.queryset.filter(category__slug=category_slug)
+        return self.queryset
+
+
+# ✅ CART VIEWSET
+class CartViewSet(viewsets.ModelViewSet):
+    serializer_class = CartSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Cart.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    # Custom endpoint to add items to cart
+    @action(detail=True, methods=["post"], permission_classes=[IsAuthenticated])
+    def add_item(self, request, pk=None):
+        cart = self.get_object()
+        product_id = request.data.get("product_id")
+        quantity = int(request.data.get("quantity", 1))
+        product = get_object_or_404(Product, id=product_id)
+
+        item, created = CartItem.objects.get_or_create(cart=cart, product=product)
+        item.quantity += quantity
+        item.save()
+
+        return Response(CartSerializer(cart).data, status=status.HTTP_200_OK)
+
+    # Remove item from cart
+    @action(detail=True, methods=["post"], permission_classes=[IsAuthenticated])
+    def remove_item(self, request, pk=None):
+        cart = self.get_object()
+        product_id = request.data.get("product_id")
+        CartItem.objects.filter(cart=cart, product_id=product_id).delete()
+        return Response(CartSerializer(cart).data, status=status.HTTP_200_OK)
+
+
+# ✅ ORDER VIEWSET
+class OrderViewSet(viewsets.ModelViewSet):
+    serializer_class = OrderSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Order.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        cart = Cart.objects.filter(user=self.request.user).first()
+        if not cart or not cart.items.exists():
+            return Response({"detail": "Your cart is empty."}, status=status.HTTP_400_BAD_REQUEST)
+
+        order = serializer.save(user=self.request.user)
+        for item in cart.items.all():
+            OrderItem.objects.create(
+                order=order,
+                product=item.product,
+                quantity=item.quantity,
+                price=item.product.price,
+            )
+
+        order.update_total_amount()
+        cart.items.all().delete()
+        return order
+
+
+# ✅ ADDRESS VIEWSET
+class AddressViewSet(viewsets.ModelViewSet):
+    serializer_class = AddressSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Address.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+# ✅ PAYMENT VIEWSET
+class PaymentViewSet(viewsets.ModelViewSet):
+    serializer_class = PaymentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Payment.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        order_id = self.request.data.get("order_id")
+        order = get_object_or_404(Order, id=order_id, user=self.request.user)
+
+        serializer.save(
+            user=self.request.user,
+            order=order,
+            amount=order.total_amount
+        )
+
+
+# ✅ DASHBOARD OVERVIEW (Optional)
+class DashboardAPIView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        orders = Order.objects.filter(user=user)
+        cart = Cart.objects.filter(user=user).first()
+
+        return Response({
+            "user": user.username,
+            "total_orders": orders.count(),
+            "total_spent": sum(o.total_amount for o in orders),
+            "cart_items": cart.items.count() if cart else 0,
+        })

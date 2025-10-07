@@ -79,3 +79,130 @@ class DashboardStatsSerializer(serializers.ModelSerializer):
     class Meta:
         model = DashboardStats
         fields = ['total_endpoints', 'total_requests', 'success_rate', 'avg_response_time', 'calculated_at']
+
+
+
+
+# ✅ Profile Serializer
+class ProfileSerializer(serializers.ModelSerializer):
+    country = CountryField(name_only=True, required=False)
+
+    class Meta:
+        model = Profile
+        fields = ["id", "avatar", "address", "city", "country", "created_at"]
+        read_only_fields = ["id", "created_at"]
+
+
+# ✅ Category Serializer
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ["id", "name", "slug", "created_at"]
+        read_only_fields = ["id", "created_at"]
+
+
+# ✅ Product Serializer
+class ProductSerializer(serializers.ModelSerializer):
+    category = CategorySerializer(read_only=True)
+    category_id = serializers.PrimaryKeyRelatedField(
+        source="category", queryset=Category.objects.all(), write_only=True
+    )
+    seller = serializers.StringRelatedField(read_only=True)
+
+    class Meta:
+        model = Product
+        fields = [
+            "id", "seller", "category", "category_id",
+            "name", "slug", "description", "price",
+            "stock", "image", "is_active",
+            "created_at", "updated_at"
+        ]
+        read_only_fields = ["id", "slug", "seller", "created_at", "updated_at"]
+
+
+# ✅ CartItem Serializer
+class CartItemSerializer(serializers.ModelSerializer):
+    product = ProductSerializer(read_only=True)
+    product_id = serializers.PrimaryKeyRelatedField(
+        source="product", queryset=Product.objects.all(), write_only=True
+    )
+    total_price = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CartItem
+        fields = ["id", "product", "product_id", "quantity", "total_price"]
+
+    def get_total_price(self, obj):
+        return obj.total_price()
+
+
+# ✅ Cart Serializer
+class CartSerializer(serializers.ModelSerializer):
+    items = CartItemSerializer(many=True, read_only=True)
+    total_price = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Cart
+        fields = ["id", "user", "created_at", "items", "total_price"]
+        read_only_fields = ["id", "user", "created_at", "total_price"]
+
+    def get_total_price(self, obj):
+        return obj.total_price()
+
+
+# ✅ OrderItem Serializer
+class OrderItemSerializer(serializers.ModelSerializer):
+    product = ProductSerializer(read_only=True)
+    total_price = serializers.SerializerMethodField()
+
+    class Meta:
+        model = OrderItem
+        fields = ["id", "product", "quantity", "price", "total_price"]
+
+    def get_total_price(self, obj):
+        return obj.total_price()
+
+
+# ✅ Order Serializer
+class OrderSerializer(serializers.ModelSerializer):
+    items = OrderItemSerializer(many=True, read_only=True)
+    total_amount = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+    user = serializers.StringRelatedField(read_only=True)
+
+    class Meta:
+        model = Order
+        fields = [
+            "id", "user", "status", "total_amount",
+            "shipping_address", "paid", "payment_reference",
+            "created_at", "updated_at", "items"
+        ]
+        read_only_fields = [
+            "id", "user", "created_at", "updated_at", "total_amount", "payment_reference"
+        ]
+
+
+# ✅ Address Serializer
+class AddressSerializer(serializers.ModelSerializer):
+    country = CountryField(name_only=True)
+
+    class Meta:
+        model = Address
+        fields = [
+            "id", "user", "full_name", "phone", "street",
+            "city", "state", "country", "postal_code", "is_default"
+        ]
+        read_only_fields = ["id", "user"]
+
+
+# ✅ Payment Serializer
+class PaymentSerializer(serializers.ModelSerializer):
+    order = serializers.StringRelatedField(read_only=True)
+    user = serializers.StringRelatedField(read_only=True)
+
+    class Meta:
+        model = Payment
+        fields = [
+            "id", "order", "user", "amount", "payment_method",
+            "status", "transaction_id", "created_at"
+        ]
+        read_only_fields = ["id", "order", "user", "created_at"]
