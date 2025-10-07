@@ -2,11 +2,14 @@
 from rest_framework import serializers
 from .models import *
 
+from django_countries.serializer_fields import CountryField
+
+
 class SignupSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
         write_only=True, 
         style={'input_type': 'password'}, 
-        required=True
+        required=True 
     )
     password2 = serializers.CharField(
         write_only=True, 
