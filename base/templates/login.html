@@ -62,8 +62,8 @@
                     <div class="relative">
                         <input 
                             type="text" 
-                            id="username" 
-                            name="username"
+                            id="email" 
+                            name="email"
                             required
                             class="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
                             placeholder="Enter your username"
@@ -233,7 +233,7 @@
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
@@ -250,7 +250,7 @@
                         'X-CSRFToken': csrfToken
                     },
                     body: JSON.stringify({
-                        username: username,
+                        email: email,
                         password: password
                     })
                 });
